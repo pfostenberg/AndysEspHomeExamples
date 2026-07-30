@@ -1,0 +1,1570 @@
+# python -m esphome run powmr1.yaml
+# https://github.com/GamesterUnknown/PowMR_ESPHome
+# 192.168.77.152
+substitutions:
+  device_name: "powmr1"
+  node_name: "PowMR1"
+  inverter_name: "INV2"
+  inverter_tx_pin: GPIO7
+  inverter_rx_pin: GPIO6
+  inverter_voltage_offset: "0"
+  update_interval: 10s 
+  select_skip_updates: "6"
+  read_skip_updates: "6"
+
+
+esphome: 
+  name: "${device_name}"
+  friendly_name: "${node_name}"
+  comment: "Monitor and control a PowMR solar inverter via modbus"
+  includes:
+    - "helpers"
+  project:
+    name: "esphome.powmr-hybrid-inverter"
+    version: 1.5.0
+
+esp32:
+  board: esp32-s3-devkitc-1
+  flash_size: 4MB
+  variant: esp32s3
+  framework:
+    type: esp-idf
+
+ota:
+- platform: esphome
+  password: !secret ota_password
+  
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "My-Inverter Fallback Hotspot"
+    password: !secret ap_password
+
+captive_portal:
+
+packages:
+  common_sensors: !include includes/common_sensors.yaml
+
+
+logger:
+  id: uart_logger
+#  baud_rate: 0
+  level: INFO
+#  logs:
+#    esp32_ble_tracker: INFO
+#    esp32_ble_client: INFO
+#    jk_bms_ble: INFO
+#    sensor: INFO
+#    text_sensor: INFO
+#    binary_sensor: INFO
+#    number: INFO
+#    modbus_controller: DEBUG
+#    uart: DEBUG
+  # logs:
+  #   component: ERROR # Fix for issue #4717 "Component xxxxxx took a long time for an operation"
+
+
+
+#time:
+#  - platform: homeassistant
+#    id: hass_time
+
+web_server:
+  version: 3
+  port: 80
+  sorting_groups:
+    - id: sg_main
+      name: "Main settings"
+      sorting_weight: 1
+    - id: sg_sonst
+      name: "sonstige"
+      sorting_weight: 10 
+   
+uart:
+
+  - id: uart_inverter
+    baud_rate: 2400
+    rx_pin: GPIO6
+    tx_pin: GPIO7
+    
+    
+    debug:
+     direction: BOTH
+     dummy_receiver: false
+     after:
+      delimiter: "\n"
+     sequence:
+      - lambda: UARTDebug::log_string(direction, bytes);
+ 
+modbus:
+  - id: modbus_inverter
+    uart_id: uart_inverter
+    send_wait_time: 500ms
+  
+
+
+modbus_controller:
+  - id: smg_inverter
+    address: 0x05
+    modbus_id: modbus_inverter
+    setup_priority: -10
+    offline_skip_updates: 100
+    #command_throttle: 1s
+    update_interval: ${update_interval}
+  
+
+
+number:
+  
+  #Menu26 - 5027  Bulk charging voltage
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 26: Bulk Charging Voltage"
+    address: 5027
+    register_type: holding
+    force_new_range: true
+    skip_updates: ${select_skip_updates}
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    entity_category: config
+    min_value: 48
+    max_value: 61
+    step: 0.1
+    mode: box
+    lambda: |-
+      return x / 10.0;
+    write_lambda: |-
+      return (uint16_t)(x * 10);
+
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+  #Menu27 - 5028 Floating charging voltage
+  
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 27: Floating Charging Voltage"
+    address: 5028
+    register_type: holding
+    force_new_range: true
+    skip_updates: ${select_skip_updates}
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    entity_category: config
+    min_value: 48
+    max_value: 61
+    step: 0.1
+    mode: box
+    lambda: |-
+      return x / 10.0;
+    write_lambda: |-
+      return (uint16_t)(x * 10);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  #Menu28 - 5029 Low DC cut-off voltage
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 28: Low DC Cut-off Voltage"
+    address: 5029
+    register_type: holding
+    force_new_range: true
+    skip_updates: ${select_skip_updates}
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    entity_category: config
+    min_value: 40
+    max_value: 49.9
+    step: 0.1
+    mode: box
+    lambda: |-
+      return x / 10.0;
+    write_lambda: |-
+      return (uint16_t)(x * 10);
+    web_server:
+      sorting_weight: 30
+      sorting_group_id: sg_main
+
+sensor:
+
+  ###################################
+  # Read first group (14 registers) #
+  ###################################
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Grid Voltage"
+    address: 4502
+    register_type: holding
+    #register_count: 14
+    #force_new_range: true
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    accuracy_decimals: 1
+    lambda: |-
+      return swapBytes(x);
+    filters:
+      - multiply: 0.1
+     # - offset: ${inverter_voltage_offset}
+     # - heartbeat: 10s
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Grid Frequency"
+    address: 4503
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "Hz"
+    device_class: frequency
+    state_class: measurement
+    accuracy_decimals: 1
+    lambda: |-
+      return swapBytes(x);
+    filters:
+      - multiply: 0.1
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    id: PV_Voltage
+    name: "${inverter_name} PV Voltage"
+    address: 4504
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    accuracy_decimals: 1
+    lambda: |-
+      return swapBytes(x);
+    filters:
+      - multiply: 0.1
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_main
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    id: PV_Power
+    name: "${inverter_name} PV Power"
+    address: 4505
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    accuracy_decimals: 1
+    lambda: |-
+     return swapBytes(x);
+    web_server:
+      sorting_weight: 12
+      sorting_group_id: sg_main
+
+  - platform: template
+    id: PV_Current
+    name: "${inverter_name} PV Current"
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: ${update_interval}
+    lambda: |-
+      if (id(PV_Voltage).state == 0) {
+        return 0;
+      }
+      return id(PV_Power).state / id(PV_Voltage).state;
+   # filters:
+   #   - heartbeat: 10s
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Battery Voltage"
+    id: battery_voltage
+    address: 4506
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    accuracy_decimals: 2
+    lambda: |-
+      return swapBytes(x);
+    filters:
+      - multiply: 0.1
+    web_server:
+      sorting_weight: 1
+      sorting_group_id: sg_main
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Battery SoC"
+    accuracy_decimals: 0
+    unit_of_measurement: "%"
+    device_class: battery
+    address: 4507
+    register_type: holding
+    value_type: U_WORD
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Battery Charge Current"
+    id: battery_charge_current
+    address: 4508
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    accuracy_decimals: 1
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Battery Discharge Current"
+    id: battery_discharge_current
+    address: 4509
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    accuracy_decimals: 1
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: template
+    name: "${inverter_name} Battery Current"
+    id: battery_current
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: ${update_interval}
+    lambda: |-
+      return id(battery_charge_current).state - id(battery_discharge_current).state;
+   # filters:
+   #   - heartbeat: 10s
+    web_server:
+      sorting_weight: 21
+      sorting_group_id: sg_main
+
+  - platform: template
+    name: "${inverter_name} Battery Power"
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    accuracy_decimals: 0
+    update_interval: ${update_interval}
+    lambda: |-
+      return id(battery_current).state * id(battery_voltage).state;
+    web_server:
+      sorting_weight: 22
+      sorting_group_id: sg_main
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Load Voltage"
+    id: load_voltage
+    address: 4510
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    accuracy_decimals: 1
+    lambda: |-
+      return swapBytes(x);
+    filters:
+      - multiply: 0.1
+    web_server:
+      sorting_weight: 2
+      sorting_group_id: sg_main
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Load Frequency"
+    address: 4511
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "Hz"
+    device_class: frequency
+    state_class: measurement
+    accuracy_decimals: 1
+    lambda: |-
+      return swapBytes(x);
+    filters:
+      - multiply: 0.1
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Load Power VA"
+    id: load_Power_VA
+    address: 4512
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "VA"
+    device_class: apparent_power
+    state_class: measurement
+    accuracy_decimals: 0
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 4
+      sorting_group_id: sg_main
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Load Power"
+    id: load_power
+    address: 4513
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    accuracy_decimals: 0
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 5
+      sorting_group_id: sg_main
+
+
+  - platform: template
+    name: "${inverter_name} Load Current"
+    id: load_current
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    accuracy_decimals: 3
+    update_interval: ${update_interval}
+    lambda: |-
+      if (id(load_voltage).state == 0) {
+        return 0;
+      }
+      return id(load_Power_VA).state / id(load_voltage).state;
+
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: template
+    name: "${inverter_name} Load Power Factor"
+    id: load_power_factor
+    device_class: power_factor
+    state_class: measurement
+    accuracy_decimals: 2
+    update_interval: ${update_interval}
+    lambda: |-
+      if (id(load_power).state == 0) {
+        return 0;
+      }
+      return id(load_power).state / id(load_Power_VA).state;
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+ 
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Load Percent"
+    address: 4514
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "%"
+    device_class: power_factor
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 31
+      sorting_group_id: sg_main
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Load Percent2"
+    address: 4515
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "%"
+    device_class: power_factor
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  # ####################################
+  # # Read second group (20 registers) #
+  # ####################################
+
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Main CPU version"
+    address: 4518
+    skip_updates: ${read_skip_updates}
+    register_type: holding
+    value_type: U_WORD
+  #  unit_of_measurement: "%"
+    device_class: power_factor
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Secondary CPU version"
+    address: 4519
+    skip_updates: ${read_skip_updates}
+    register_type: holding
+    value_type: U_WORD
+  #  unit_of_measurement: "%"
+    device_class: power_factor
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+  
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Nominal Output Apparent Power"
+    address: 4521
+    skip_updates: ${read_skip_updates}
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "VA"
+    device_class: apparent_power
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+      
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Nominal Output Active Power"
+    address: 4522
+    skip_updates: ${read_skip_updates}
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+ 
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Nominal Grid Voltage"
+    address: 4523
+    skip_updates: ${read_skip_updates}
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Nominal Grid Current"
+    address: 4524
+    skip_updates: ${read_skip_updates}
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Rated Battery Voltage"
+    address: 4525
+    skip_updates: ${read_skip_updates}
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    filters:
+      - multiply: 0.1
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Nominal Output Voltage"
+    address: 4526
+    skip_updates: ${read_skip_updates}
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Nominal Output Frequency"
+    address: 4527
+    skip_updates: ${read_skip_updates}
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "Hz"
+    device_class: frequency
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+      
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Nominal Output Current"
+    address: 4528
+    skip_updates: ${read_skip_updates}
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Unknown4529"
+    address: 4529
+    skip_updates: ${read_skip_updates}
+    register_type: holding
+    value_type: U_WORD
+  #  unit_of_measurement: "%"
+    device_class: power_factor
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 11
+      sorting_group_id: sg_sonst
+
+
+
+  # 4535 -> binary
+
+  # 4536 -> text
+
+  # 4537 -> text
+
+  # 4538 -> text
+ 
+  # ####################################
+  # # Read third group (22 registers)  #
+  # ####################################
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Charger Source Priority"
+    address: 4536
+    #force_new_range: true
+    #register_count: 22
+    register_type: holding
+    value_type: U_WORD
+  #  unit_of_measurement: "%"
+    device_class: power_factor
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Output Source Priority"
+    address: 4537
+    register_type: holding
+    value_type: U_WORD
+  #  unit_of_measurement: "%"
+    device_class: power_factor
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 52
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} AC Input Voltage Range"
+    address: 4538
+    register_type: holding
+    value_type: U_WORD
+  #  unit_of_measurement: "%"
+    device_class: power_factor
+    state_class: measurement
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 53
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Target Output Frequency"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    address: 4540
+    register_type: holding
+    value_type: U_WORD
+    device_class: frequency
+    unit_of_measurement: "Hz"
+    lambda: |-
+      uint16_t value = swapBytes(x);
+      switch (value) {
+        case 0: return std::uint16_t(50);
+        case 1: return std::uint16_t(60);
+        default: return x;
+      }
+      
+    web_server:
+      sorting_weight: 54
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Max Total Charging Current"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    address: 4541
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "A"
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 55
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Target Output Voltage"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    address: 4542
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 56
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Max Utility Charging Current"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    address: 4543
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "A"
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 57
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Back To Utility Source Voltage"
+    filters:
+      - multiply: 0.1
+    accuracy_decimals: 1
+    entity_category: diagnostic
+    address: 4544
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 58
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Back To Battery Source Voltage"
+    filters:
+      - multiply: 0.1
+    accuracy_decimals: 1
+    entity_category: diagnostic
+    address: 4545
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 59
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Bulk Charging Voltage"
+    filters:
+      - multiply: 0.1
+    accuracy_decimals: 1
+    entity_category: diagnostic
+    address: 4546
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 60
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Floating Charging Voltage"
+    filters:
+      - multiply: 0.1
+    accuracy_decimals: 1
+    entity_category: diagnostic
+    address: 4547
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 61
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Low CutOff Voltage"
+    filters:
+      - multiply: 0.1
+    accuracy_decimals: 1
+    entity_category: diagnostic
+    address: 4548
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 62
+      sorting_group_id: sg_main
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Battery Equalization Voltage"
+    filters:
+      - multiply: 0.1
+    accuracy_decimals: 1
+    entity_category: diagnostic
+    address: 4549
+    register_type: holding
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 63
+      sorting_group_id: sg_main
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Battery Equalized Time"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    address: 4550
+    register_type: holding
+    value_type: U_WORD
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 63
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Battery Equalized Timeout"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    address: 4551
+    register_type: holding
+    value_type: U_WORD
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 64
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Equalization Interval"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    address: 4552
+    register_type: holding
+    value_type: U_WORD
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 65
+      sorting_group_id: sg_sonst
+
+
+  # 4553 -> binary
+
+  # 4554 -> binary
+
+  # 4555 -> text
+
+#  - platform: modbus_controller
+#    modbus_controller_id: smg_inverter
+#    name: "${inverter_name} Charger Status"
+#    accuracy_decimals: 0
+#    entity_category: diagnostic
+#    address: 4555
+#    register_type: holding
+#    value_type: U_WORD
+#    lambda: |-
+#      return swapBytes(x);
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Temperature"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    address: 4556
+    register_type: holding
+    unit_of_measurement: "°C"
+    value_type: U_WORD
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Temperature2"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    address: 4557
+    register_type: holding
+    unit_of_measurement: "°C"
+    value_type: U_WORD
+    lambda: |-
+      return swapBytes(x);
+    web_server:
+      sorting_weight: 40
+      sorting_group_id: sg_main
+
+      
+binary_sensor:
+  
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Record Fault Code"
+    entity_category: diagnostic
+    address: 4535
+    register_type: holding
+    bitmask: 0x1
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Battery Equalization"
+    entity_category: diagnostic
+    address: 4535
+    register_type: holding
+    bitmask: 0x2
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+
+ #  - platform: modbus_controller
+ #    modbus_controller_id: smg_inverter
+ #    name: "Equalization Activated Immediately"
+ #    entity_category: diagnostic
+ #    address: 4535
+ #    register_type: holding
+ #    bitmask: 0x4
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Alarm"
+    entity_category: diagnostic
+    address: 4535
+    register_type: holding
+    bitmask: 0x100
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Backlight"
+    entity_category: diagnostic
+    address: 4535
+    register_type: holding
+    bitmask: 0x400
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Restart On Overload"
+    entity_category: diagnostic
+    address: 4535
+    register_type: holding
+    bitmask: 0x800
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Restart On Overheat"
+    entity_category: diagnostic
+    address: 4535
+    register_type: holding
+    bitmask: 0x1000
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Beep On Primary Source Fail"
+    entity_category: diagnostic
+    address: 4535
+    register_type: holding
+    bitmask: 0x2000
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Return To Default Screen"
+    entity_category: diagnostic
+    address: 4535
+    register_type: holding
+    bitmask: 0x4000
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Overload Bypass"
+    entity_category: diagnostic
+    address: 4535
+    register_type: holding
+    bitmask: 0x8000
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} On Battery 4553 0x100"
+    address: 4553
+    register_type: holding
+    bitmask: 0x100
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Grid Active 4553 0x200"
+    address: 4553
+    register_type: holding
+    bitmask: 0x200
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Load Off"
+    address: 4553
+    register_type: holding
+    bitmask: 0x1000
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Grid Active 4553 0x2000"
+    address: 4553
+    register_type: holding
+    bitmask: 0x2000
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Load Enabled"
+    address: 4553
+    register_type: holding
+    bitmask: 0x4000
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} On Battery"
+    address: 4554
+    register_type: holding
+    bitmask: 0x1
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Grid Not Active"
+    id: grid_active2
+    address: 4554
+    register_type: holding
+    bitmask: 0x100
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Grid Active"
+    id: grid_active
+    address: 4554
+    register_type: holding
+    bitmask: 0x8000
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+text_sensor:
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Charger Status"
+    entity_category: diagnostic
+    address: 4555
+    register_type: holding
+    raw_encode: HEXBYTES
+    lambda: |-
+      uint16_t value = swapBytes(x);
+      switch (value) {
+        case 0: return std::string("Off");
+        case 1: return std::string("Idle");
+        case 2: return std::string("Active");
+        default: return std::string("Unknown");
+      }
+    web_server:
+      sorting_weight: 81
+      sorting_group_id: sg_sonst
+
+
+  # ####################################
+  # # Read config registers one by one #
+  # ####################################
+
+select:
+#Menu18 -5002
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 18: Buzzer Alarm"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5002
+    value_type: U_WORD
+    optionsmap:
+      "OFF": 0
+      "ON": 1
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+  
+#Menu6 -5005
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 06: Auto restart when overload"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5005
+    value_type: U_WORD
+    optionsmap:
+      "OFF": 0
+      "ON": 1
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+#Menu7 -5006
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 07: Auto restart when overheat"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5006
+    value_type: U_WORD
+    optionsmap:
+      "OFF": 0
+      "ON": 1
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+#menu22-5007
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 22: Beep On Primary Source Fail"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5007
+    value_type: U_WORD
+    optionsmap:
+      "OFF": 0
+      "ON": 1
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+ #menu23 - 5009
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 23: Overload Bypass"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5009
+    value_type: U_WORD
+    optionsmap:
+      "OFF": 0
+      "ON": 1
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+#menu16 -5017
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    id: charger_source_priority_select
+    name: "${inverter_name} Menu 16: Charger Source Priority"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5017
+    value_type: U_WORD
+    optionsmap:
+    #  "Utility first": 0
+      "Solar first": 0
+      "Solar and Utility": 1
+      "Only Solar": 2
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+      
+#Menu1 -5018
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    id: output_source_priority_select
+    name: "${inverter_name} Menu 01: Output Source Priority"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5018
+    value_type: U_WORD
+    optionsmap:
+      "USB": 0
+      "SUB": 1
+      "SBU": 2
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+
+#Menu3-5019
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 03: AC Input Voltage"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5019
+    value_type: U_WORD
+    optionsmap:
+      "90-280VAC": 0
+      "170-280VAC": 1
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+#Menu4 -?    
+#Menu5 -5020
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 05: Battery Type"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5020
+    value_type: U_WORD
+    optionsmap:
+      "AGM": 0
+      "Flooded": 1
+      "User Defined": 2     
+      "Litium": 3 
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+
+
+#Menu8 -?
+#Menu9 -5021 Output frequency  0 - 50hz, 1 - 60hz
+
+#Menu2-5022
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 02: Max Total Charge Current"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5022
+    value_type: U_WORD
+    optionsmap:
+      "10": 10
+      "20": 20
+      "30": 30
+      "40": 40
+      "50": 50
+      "60": 60
+      "70": 70
+      "80": 80
+      "90": 90
+      "100": 100
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+#Menu10 -5023 Output voltage (one of 220, 230, 240)
+
+#Menu11 - 5024
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 11: Max Utility Charge Current"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5024
+    value_type: U_WORD
+    optionsmap:
+      "10": 10
+      "20": 20
+      "30": 30
+      "40": 40
+      "50": 50
+      "60": 60
+      "70": 70
+      "80": 80
+      "90": 90
+      "100": 100
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+#Menu12 - 5025
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 12: Back To Utility Source Voltage"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5025
+    value_type: U_WORD
+    optionsmap:
+      "42": 420
+      "43": 430
+      "44": 440
+      "45": 450
+      "46": 460
+      "47": 470
+      "48": 480
+      "49": 490
+      "50": 500
+      "51": 510
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+#Menu13 - 5026
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "${inverter_name} Menu 13: Back To Battery Source Voltage"
+    optimistic: true
+    force_new_range: true
+    register_count: 1
+    skip_updates: ${select_skip_updates}
+    entity_category: config
+    address: 5026
+    value_type: U_WORD
+    optionsmap:
+      "FULL": 0
+      "48": 480
+      "49": 490
+      "50": 500
+      "51": 510
+      "52": 520
+      "53": 530
+      "54": 540
+      "55": 550
+      "56": 560    
+      "57": 570
+      "58": 580
+    web_server:
+      sorting_weight: 51
+      sorting_group_id: sg_sonst
+
+  
+  
+  #Menu29 - 5030 Battery equalization voltage
+  #Menu33 - 5031 Battery equalized time
+  #Menu34 - 5032 Battery equalized timeout
+  #Menu35 - 5033 Equalization interval
+  
+button:
+  - platform: restart
+    name: "Neustart RS485/WIFI"
+    web_server:
+      sorting_weight: 100
+      sorting_group_id: sg_main
+      
