@@ -33,6 +33,8 @@
 substitutions:
   name: pipsep1
   device_description: "2 Seplos at PowMr 6.2KW 1.3.2026 KLO Garage"
+  seplos_component_ref: "main"
+  http_verify_ssl: "false"
  
 
 esphome:
@@ -94,7 +96,7 @@ button:
     
 
 http_request:
-  verify_ssl: false
+  verify_ssl: ${http_verify_ssl}
   
 
 esp32:
@@ -137,7 +139,7 @@ pipsolar:
 # 
 #SELPOS START
 external_components:
-  - source: github://syssi/esphome-seplos-bms@main
+  - source: github://syssi/esphome-seplos-bms@${seplos_component_ref}
     refresh: 0s
 
 

@@ -489,7 +489,7 @@ sensor:
     accuracy_decimals: 2
     update_interval: ${update_interval}
     lambda: |-
-      if (id(load_power).state == 0) {
+      if (id(load_power).state == 0 || id(load_Power_VA).state == 0) {
         return 0;
       }
       return id(load_power).state / id(load_Power_VA).state;

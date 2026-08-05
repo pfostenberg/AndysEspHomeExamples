@@ -19,6 +19,7 @@
 substitutions:
   device_name: "wt1"
   friendly_name: "wanptek 60V 50A KPS6050D RC1"                                           
+  http_verify_ssl: "false"
   
 esphome:
   name: ${device_name}
@@ -62,7 +63,7 @@ ota:
     password: !secret ota_password
 
 http_request:
-  verify_ssl: false
+  verify_ssl: ${http_verify_ssl}
    
 # lochraster 2026.05 mit ESP32    
 uart:

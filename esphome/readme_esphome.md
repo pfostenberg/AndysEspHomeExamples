@@ -1,7 +1,11 @@
+# ESPHome Notes
 
-I use EspHome and Iobroker to control my devices via mqtt 
+Ich nutze ESPHome und ioBroker, um meine Gerate uber MQTT zu steuern.
 
-A 3000W 60V 50A Charger for Seplos DIY systems 48V 16S system with 280Ah.
+Beispiel-Setup:
 
-see wanptek_d1mini32.yaml for a example for Model: KPS6050D 
+- 3000W 60V 50A Ladegerat
+- Seplos DIY System, 48V 16S, 280Ah
+
+Fur ein Beispiel zum Modell KPS6050D siehe wanptek_d1mini32.yaml:
 https://www.wanptek.com/productinfo/1172723.html

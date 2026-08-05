@@ -7,6 +7,7 @@ substitutions:
   modbus_controller_id: mb1   
   device_type: lumiax1         
   multiplier_mischung: "0.1"
+  http_verify_ssl: "false"
 
 esphome:
   name: ${device_name}
@@ -62,7 +63,7 @@ http_request:
   timeout: 15s
   
 # mutec cert not root id to validate!  
-  verify_ssl: false
+  verify_ssl: ${http_verify_ssl}
   
 
 # GPIO12(D6) ( ALT TX-16) (ESP32 IO19)
