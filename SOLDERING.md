@@ -31,64 +31,7 @@ Diese Platine vereinheitlicht alle Komponenten für die Verbindung von Solaranla
 | U2 (optional) | LDO-Regler | AMS1117-3.3V oder LM1117 | 5V → 3.3V |
 | CN1–CN3 | JST-Stecker | 2.54mm Pitch | Strom, RX/TX, GND |
 | Lötpads | – | – | ESP32-S3 Direct-Mount möglich |
-
----
-
-## Lötsequenz (Profis)
-
-### Phase 1: Platinen-Prep
-1. Sichtprüfung: Kratzer, Risse, durchgehende Pads?
-2. Lötpaste (Blei-frei oder Blei: SnPb63) auftragen (oder manuell löten)
-
-### Phase 2: SMD-Bauteile (0805 / 1206 Widerstände, Kondensatoren)
-1. Kleinste Widerstände zuerst (R-Series)
-2. Kondensatoren (von oben nach unten)
-3. Dioden (Polung prüfen: Stripe = Kathode)
-4. ICs (MAX485) – Pad-Ausrichtung triple-prüfen
-
-**Profitipp:** Reflow-Ofen ~240–260°C, wenn verfügbar. Sonst mit Lötkolben (350°C) einzeln.
-
-### Phase 3: Stecker & Durchstecklöcher
-1. JST-Stecker in die Pads einlegen (Kontakte müssen frei sein)
-2. Pin-Header (2.54mm) für ESP-Anschluss einsetzen
-3. Rückseite: Kupfer-Pads gut verzinnen vor dem Einlöten
-4. Mit Zinn durchflussmittel (Paste) für sichere Verbindungen
-
-### Phase 4: Power-Anschlüsse
-1. GND-Pads zuerst löten (thermische Massen!)
-2. VCC/12V-Pads direkt danach
-3. Kurzkontrolle mit Multimeter durchführen
-
-### Phase 5: Quality Check
-1. Durchgangstest: GND → alle GND-Pads
-2. Isolationsprüfung: VCC gegen GND (mind. 1 MΩ bei kaltem Gerät)
-3. Sichtprüfung Lötbrücken under Video-Microscope (~50x)
-
----
-
-## Schaltplan-Referenz
-
-Siehe die PDFs im Ordner `./Schaltpläne/`:
-
-### Tasmota4rs485_Schaltplan.pdf
-- Komplette Schaltung mit allen Verbindungen
-- Designatoren (R1, R2, C1 usw.) folgen diesem Schaltplan – **nicht den Bildern!**
-- IC-Positionen und Pin-Belegungen: Hier prüfen vor dem Löten
-- Polung von ICs: Pin 1 = meist oben-links im Schaltplan markiert
-
-### Tasmota4rs485_BS.pdf (Bestückungsplan)
-- Physische Anordnung der Bauteile auf der PCB
-- Rote Flächen = Bestückungsseite (oben)
-- Grüne/blaue Flächen = Rückseite (wenn SMD-Bestückung)
-- Verwende dies **parallel zur Platine** beim Löten – Designatoren und Positionen abgleichen
-
-### Best Practice beim Löten
-1. **Schaltplan öffnen** → Designator suchen (z.B. „C1")
-2. **Bestückungsplan** → Position auf der PCB ablesen
-3. **Wert aus Schaltplan** → z.B. „C1 = 10µF" → Bauteil besorgen und einlöten
-4. **Strompfade nachverfolgbar?** GND sollte durchgehende Kupferplatte sein → In PDF sichtbar
-
----
+ Reflow-Ofen ~240–260°C, wenn verfügbar. Sonst mit Lötkolben (350°C) einzeln.
 
 ## Kritische Verbindungen
 
@@ -97,11 +40,6 @@ Siehe die PDFs im Ordner `./Schaltpläne/`:
 | ESP32 RX/TX → RS485 U1 | JA | Nur 3.3V! TVS-Dioden auf jeden Fall verlöten |
 | Power-Eingänge (12/24V) | JA | Polung triple-prüfen; Verpolung zerstört den Regler |
 | MAX485 AB-Leitungen | MITTEL | Terminierungswiderstände (120Ω) an beiden Enden des RS485-Busses! |
-| GND-Planes | WICHTIG | Alle GND sollten sehr niederohmig verbunden sein |
-
----
-
-## Häufige Fehler
 
 | Problem | Ursache | Lösung |
 | ------- | ------ | ------ |
@@ -111,15 +49,6 @@ Siehe die PDFs im Ordner `./Schaltpläne/`:
 | Überhitzung des Reglers (U2) | Zu hohe Input-Spannung oder zu viel Last | Spannung prüfen, ggf. Step-Down-Regler vorschalten |
 
 ---
-
-## Nach dem Löten
-
-### Reinigung
-```bash
-Isopropanol (IPA) + weiche Bürste → alle Flussmittelreste weg
-Optional: Ultraschallreinigung bei hartnäckigen Resten
-```
-
 ### Erste Inbetriebnahme
 1. **Ohm-Test vor Stromzufuhr:**
    - VCC gegen GND: > 1 MΩ (kein Kurzschluss!)
@@ -149,7 +78,7 @@ Optional: Ultraschallreinigung bei hartnäckigen Resten
 
 ---
 
-## Tipp: Parametrierung nach dem Flashen
+## Parametrierung nach dem Flashen
 
 Nach erfolgreichem Boot:
 1. **Secrets prüfen** ([HOWTO.md](HOWTO.md) Abschnitt 5)

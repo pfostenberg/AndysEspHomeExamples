@@ -10,7 +10,37 @@ Komplette Schritt-für-Schritt-Anleitung – vom leeren ESP-Board bis zur laufen
 
 ---
 
-## 1. Voraussetzungen
+## Quick Start mit Setup-Scripts (empfohlen)
+
+Falls du Windows oder Linux/macOS nutzt, können die vorbereiteten Setup-Scripts Python-Environment und ESPHome automatisch einrichten:
+
+### Windows (PowerShell)
+```powershell
+cd AndysEspHomeExamples
+.scripts\setup-esphome.ps1
+```
+
+### Linux / macOS
+```bash
+cd AndysEspHomeExamples
+bash scripts/setup-esphome.sh
+```
+
+Das Script macht folgende Schritte automatisch:
+- ✓ Prüft Python 3.10+
+- ✓ Erstellt venv (falls nicht vorhanden)
+- ✓ Aktiviert venv
+- ✓ Installiert ESPHome
+
+Nach erfolgreichem Script-Ablauf: Gehe direkt zu **Abschnitt 5 (Secrets einrichten)**.
+
+---
+
+## Manuelle Installation (Alternative)
+
+Falls du die Scripts nicht verwenden möchtest oder auf einer anderen Platform arbeitest:
+
+### 1. Voraussetzungen
 
 ### Software
 
@@ -29,7 +59,7 @@ Komplette Schritt-für-Schritt-Anleitung – vom leeren ESP-Board bis zur laufen
 
 ---
 
-## 2. Python-Umgebung einrichten
+### 2. Python-Umgebung einrichten
 
 ```bash
 # Virtuelles Environment erstellen
@@ -44,7 +74,7 @@ source .venv/bin/activate
 
 ---
 
-## 3. ESPHome installieren
+### 3. ESPHome installieren
 
 ```bash
 python -m pip install esphome
@@ -58,7 +88,7 @@ python -m esphome version
 
 ---
 
-## 4. Repository klonen
+### 4. Repository klonen
 
 ```bash
 git clone https://github.com/<user>/AndysEspHomeExamples.git
