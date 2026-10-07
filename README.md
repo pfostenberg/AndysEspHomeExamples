@@ -16,6 +16,7 @@ Dieses Repository bietet praxisnahe YAML-Konfigurationen und Helper-Code, um Tel
 - esphome/PowMr/: PowMr-Inverter-Profil, Includes und C++-Helper.
 - esphome/PowMr/src/: Modularisierte PowMr-Variante (main.yaml + Module).
 - esphome/readme_esphome.md: Zusatzhinweise fur einzelne Gerate.
+- [scripts/build-powmr1.ps1](scripts/build-powmr1.ps1): PowerShell-Build-Script fur [esphome/powmr1.yaml](esphome/powmr1.yaml).
 
 ### Voraussetzungen
 
@@ -69,6 +70,39 @@ Mindestens anpassen:
 - Update-Intervalle passend zu Last und Performance.
 
 ### Verwendung
+
+#### PowMr mit PowerShell
+
+Das [Build-Script](scripts/build-powmr1.ps1) verwendet
+[esphome/powmr1.yaml](esphome/powmr1.yaml). Es findet ESPHome in `scripts/.venv`,
+alternativ in `.venv` oder im PATH. Die Konfiguration wird unabhangig vom
+aktuellen Terminalordner gefunden.
+
+Aus dem Repository-Verzeichnis:
+
+```powershell
+.\scripts\build-powmr1.ps1 validate
+.\scripts\build-powmr1.ps1 compile
+.\scripts\build-powmr1.ps1 upload -Device COM3
+.\scripts\build-powmr1.ps1 ota -Device 192.168.77.13
+.\scripts\build-powmr1.ps1 logs -Device 192.168.77.13
+.\scripts\build-powmr1.ps1 run -Device COM3
+.\scripts\build-powmr1.ps1 help
+```
+
+Ohne Befehl wird nur kompiliert. `upload` und `ota` kompilieren vor dem Flashen.
+Ohne `-Device` verwendet `ota` den Hostnamen `powmr1.local`; bei `upload`, `logs`
+und `run` ubernimmt ESPHome die Gerateauswahl. Fehler werden als Exit-Code
+weitergegeben. Weitere Setup-Hinweise stehen in [HOWTO.md](HOWTO.md).
+
+Aktueller Konfigurations-Blocker: Die YAML referenziert
+`includes/common_sensors.yaml`, das relativ zu ihrem Speicherort fehlt.
+Die vorhandene Datei liegt unter
+[esphome/PowMr/includes/common_sensors.yaml](esphome/PowMr/includes/common_sensors.yaml).
+Vor dem Build mussen die relativen `!include`- und `includes`-Pfade in der YAML
+zu den vorhandenen Dateien passen.
+
+#### Direkte ESPHome-Aufrufe
 
 Konfiguration validieren:
 

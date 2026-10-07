@@ -34,6 +34,8 @@ substitutions:
   name: pipseplos01
   device_description: "3 Seplos und PowMr 8KW"
   seplos_component_ref: "main"
+  # pip8048-Branch: zwei getrennte PV-Eingaenge (QPIGS2)
+  pipsolar_component_ref: "pip8048"
   http_verify_ssl: "false"
  
 
@@ -47,8 +49,8 @@ esphome:
 
 # Enable logging
 logger:
-  level: DEBUG # show IP address
-  #level: INFO # VERY_VERBOSE, VERBOSE, DEBUG, INFO, WARN, ERROR, NONE
+  #level: DEBUG # show IP address
+  level: INFO # VERY_VERBOSE, VERBOSE, DEBUG, INFO, WARN, ERROR, NONE
 
 wifi: 
   ssid: !secret wifi_ssid
@@ -133,15 +135,17 @@ uart:
 #    sequence:
 #      - lambda: UARTDebug::log_string(direction, bytes);
    
-pipsolar:
+pip8048: 
   - uart_id: uart_pip1
     id: inverter1
     update_interval: 60s
 # 
 #SELPOS START
 external_components:
-  - source: github://syssi/esphome-seplos-bms@${seplos_component_ref}
-    refresh: 0s
+  - source: github://syssi/esphome-seplos-bms@main
+    refresh: 3660s
+  - source: github://syssi/esphome-pipsolar@main
+    refresh: 3660s
 
 
 seplos_modbus:
@@ -153,22 +157,26 @@ seplos_bms:
     # Dip switch configuration of the first pack / address 0x01
     #  8    7    6    5    4    3    2   1
     # off, off, off, off, off, off, off, on
-    address: 0x01
+    address: 0x00
     # Known protocol versions: 0x20 (Seplos), 0x26 (Boqiang)
     protocol_version: 0x20
     seplos_modbus_id: modbus_bms
     update_interval: 120s
   - id: battery_bank1
-    address: 0x02
+    address: 0x01
     protocol_version: 0x20
     seplos_modbus_id: modbus_bms
     update_interval: 120s
   - id: battery_bank2
-    address: 0x03
+    address: 0x02
     protocol_version: 0x20
     seplos_modbus_id: modbus_bms
     update_interval: 120s
 #SEPLOS END  
+
+# Komponente liefert Volt; ioBroker erwartet weiterhin Millivolt
+.v_to_mv: &v_to_mv
+  - multiply: 1000
 
 sensor:
 #SEPLOS START
@@ -177,143 +185,159 @@ sensor:
     seplos_bms_id: battery_bank0        
     rated_capacity:
       name: "BMS1.amp_hours1"
-      state_topic: "BatteryPack1/amp_hours1"
+      state_topic: "Seplos/BatteryPack1/amp_hours1"
       web_server:
         sorting_weight: 80
         sorting_group_id: sg_bms1
     cell_voltage_1:
+      filters: *v_to_mv
       name: "BMS1.cell01"
-      state_topic: "BatteryPack1/cell01"
+      state_topic: "Seplos/BatteryPack1/cell01"
       web_server:
         sorting_weight: 51
         sorting_group_id: sg_bms1
     cell_voltage_2:
+      filters: *v_to_mv
       name: "BMS1.cell02"
-      state_topic: "BatteryPack1/cell02"
+      state_topic: "Seplos/BatteryPack1/cell02"
       web_server:
         sorting_weight: 52
         sorting_group_id: sg_bms1
     cell_voltage_3:
+      filters: *v_to_mv
       name: "BMS1.cell03"
-      state_topic: "BatteryPack1/cell03"
+      state_topic: "Seplos/BatteryPack1/cell03"
       web_server:
         sorting_weight: 53
         sorting_group_id: sg_bms1
     cell_voltage_4:
+      filters: *v_to_mv
       name: "BMS1.cell04"
-      state_topic: "BatteryPack1/cell04"
+      state_topic: "Seplos/BatteryPack1/cell04"
       web_server:
         sorting_weight: 54
         sorting_group_id: sg_bms1
     cell_voltage_5:
+      filters: *v_to_mv
       name: "BMS1.cell05"
-      state_topic: "BatteryPack1/cell05"
+      state_topic: "Seplos/BatteryPack1/cell05"
       web_server:
         sorting_weight: 55
         sorting_group_id: sg_bms1
     cell_voltage_6:
+      filters: *v_to_mv
       name: "BMS1.cell06"
-      state_topic: "BatteryPack1/cell06"
+      state_topic: "Seplos/BatteryPack1/cell06"
       web_server:
         sorting_weight: 56
         sorting_group_id: sg_bms1
     cell_voltage_7:
+      filters: *v_to_mv
       name: "BMS1.cell07"
-      state_topic: "BatteryPack1/cell07"
+      state_topic: "Seplos/BatteryPack1/cell07"
       web_server:
         sorting_weight: 57
         sorting_group_id: sg_bms1
     cell_voltage_8:
+      filters: *v_to_mv
       name: "BMS1.cell08"
-      state_topic: "BatteryPack1/cell08"
+      state_topic: "Seplos/BatteryPack1/cell08"
       web_server:
         sorting_weight: 58
         sorting_group_id: sg_bms1
     cell_voltage_9:
+      filters: *v_to_mv
       name: "BMS1.cell09"
-      state_topic: "BatteryPack1/cell09"
+      state_topic: "Seplos/BatteryPack1/cell09"
       web_server:
         sorting_weight: 59
         sorting_group_id: sg_bms1
     cell_voltage_10:
+      filters: *v_to_mv
       name: "BMS1.cell10"
-      state_topic: "BatteryPack1/cell10"
+      state_topic: "Seplos/BatteryPack1/cell10"
       web_server:
         sorting_weight: 60
         sorting_group_id: sg_bms1
     cell_voltage_11:
+      filters: *v_to_mv
       name: "BMS1.cell11"
-      state_topic: "BatteryPack1/cell11"
+      state_topic: "Seplos/BatteryPack1/cell11"
       web_server:
         sorting_weight: 61
         sorting_group_id: sg_bms1
     cell_voltage_12:
+      filters: *v_to_mv
       name: "BMS1.cell12"
-      state_topic: "BatteryPack1/cell12"
+      state_topic: "Seplos/BatteryPack1/cell12"
       web_server:
         sorting_weight: 62
         sorting_group_id: sg_bms1
     cell_voltage_13:
+      filters: *v_to_mv
       name: "BMS1.cell13"
-      state_topic: "BatteryPack1/cell13"
+      state_topic: "Seplos/BatteryPack1/cell13"
       web_server:
         sorting_weight: 63
         sorting_group_id: sg_bms1
     cell_voltage_14:
+      filters: *v_to_mv
       name: "BMS1.cell14"
-      state_topic: "BatteryPack1/cell14"
+      state_topic: "Seplos/BatteryPack1/cell14"
       web_server:
         sorting_weight: 64
         sorting_group_id: sg_bms1
     cell_voltage_15:
+      filters: *v_to_mv
       name: "BMS1.cell15"
-      state_topic: "BatteryPack1/cell15"    
+      state_topic: "Seplos/BatteryPack1/cell15"    
       web_server:
         sorting_weight: 65
         sorting_group_id: sg_bms1
     cell_voltage_16:
+      filters: *v_to_mv
       name: "BMS1.cell16"
-      state_topic: "BatteryPack1/cell16"    
+      state_topic: "Seplos/BatteryPack1/cell16"    
       web_server:
         sorting_weight: 66
         sorting_group_id: sg_bms1
     temperature_1:
       accuracy_decimals: 1
       name: "BMS1.cell_temp1"
-      state_topic: "BatteryPack1/cell_temp1"
+      state_topic: "Seplos/BatteryPack1/cell_temp1"
       web_server:
         sorting_weight: 21
         sorting_group_id: sg_bms1
     temperature_2:
       accuracy_decimals: 1
       name: "BMS1.cell_temp2"
-      state_topic: "BatteryPack1/cell_temp2"
+      state_topic: "Seplos/BatteryPack1/cell_temp2"
       web_server:
         sorting_weight: 22
         sorting_group_id: sg_bms1
     temperature_3:
       accuracy_decimals: 1
       name: "BMS1.cell_temp3"
-      state_topic: "BatteryPack1/cell_temp3"
+      state_topic: "Seplos/BatteryPack1/cell_temp3"
       web_server:
         sorting_weight: 23
         sorting_group_id: sg_bms1
     temperature_4:
       accuracy_decimals: 1
       name: "BMS1.cell_temp4"
-      state_topic: "BatteryPack1/cell_temp4"
+      state_topic: "Seplos/BatteryPack1/cell_temp4"
       web_server:
         sorting_weight: 24
         sorting_group_id: sg_bms1
     current:      
       name: "BMS1.charge_discharge"
-      state_topic: "BatteryPack1/charge_discharge"
+      state_topic: "Seplos/BatteryPack1/charge_discharge"
       web_server:
         sorting_weight: 10
         sorting_group_id: sg_bms1
     charging_cycles:
       name: "BMS1.cycles"
-      state_topic: "BatteryPack1/cycles"
+      state_topic: "Seplos/BatteryPack1/cycles"
       web_server:
         sorting_weight: 82
         sorting_group_id: sg_bms1
@@ -321,20 +345,20 @@ sensor:
       filters:
       - multiply: 1000
       name: "BMS1.diff_mv"
-      state_topic: "BatteryPack1/diff_mv"
+      state_topic: "Seplos/BatteryPack1/diff_mv"
       web_server:
         sorting_weight: 83
         sorting_group_id: sg_bms1
     port_voltage:
       name: "BMS1.port_voltage"
-      state_topic: "BatteryPack1/port_voltage"
+      state_topic: "Seplos/BatteryPack1/port_voltage"
       accuracy_decimals: 1
       web_server:
         sorting_weight: 31
         sorting_group_id: sg_overview
     power:
       name: "BMS1.power"
-      state_topic: "BatteryPack1/power"
+      state_topic: "Seplos/BatteryPack1/power"
       accuracy_decimals: 0
       web_server:
         sorting_weight: 41
@@ -342,45 +366,45 @@ sensor:
     temperature_5:
       accuracy_decimals: 1
       name: "BMS1.env_temp"
-      state_topic: "BatteryPack1/env_temp"
+      state_topic: "Seplos/BatteryPack1/env_temp"
       web_server:
         sorting_weight: 25
         sorting_group_id: sg_bms1
     temperature_6:
       accuracy_decimals: 1
       name: "BMS1.power_temp"
-      state_topic: "BatteryPack1/power_temp"
+      state_topic: "Seplos/BatteryPack1/power_temp"
       web_server:
         sorting_weight: 26
         sorting_group_id: sg_bms1
     battery_capacity:
       name: "BMS1.amp_hours2"
-      state_topic: "BatteryPack1/amp_hours2"
+      state_topic: "Seplos/BatteryPack1/amp_hours2"
       web_server:
         sorting_weight: 81
         sorting_group_id: sg_bms1
     residual_capacity:
       name: "BMS1.residual_capacity"
-      state_topic: "BatteryPack1/residual_capacity"
+      state_topic: "Seplos/BatteryPack1/residual_capacity"
       web_server:
         sorting_weight: 83
         sorting_group_id: sg_bms1
     state_of_charge:
       name: "BMS1.soc"
-      state_topic: "BatteryPack1/soc"
+      state_topic: "Seplos/BatteryPack1/soc"
       web_server:
         sorting_weight: 11
         sorting_group_id: sg_overview
       
     state_of_health:
       name: "BMS1.soh"
-      state_topic: "BatteryPack1/soh"
+      state_topic: "Seplos/BatteryPack1/soh"
       web_server:
         sorting_weight: 85
         sorting_group_id: sg_bms1
     total_voltage:
       name: "BMS1.total_voltage"
-      state_topic: "BatteryPack1/total_voltage"
+      state_topic: "Seplos/BatteryPack1/total_voltage"
       web_server:
         sorting_weight: 10
         sorting_group_id: sg_bms1
@@ -393,143 +417,159 @@ sensor:
     seplos_bms_id: battery_bank1
     rated_capacity:
       name: "BMS2.amp_hours1"
-      state_topic: "BatteryPack2/amp_hours1"
+      state_topic: "Seplos/BatteryPack2/amp_hours1"
       web_server:
         sorting_weight: 80
         sorting_group_id: sg_bms2
     cell_voltage_1:
+      filters: *v_to_mv
       name: "BMS2.cell01"
-      state_topic: "BatteryPack2/cell01"
+      state_topic: "Seplos/BatteryPack2/cell01"
       web_server:
         sorting_weight: 51
         sorting_group_id: sg_bms2
     cell_voltage_2:
+      filters: *v_to_mv
       name: "BMS2.cell02"
-      state_topic: "BatteryPack2/cell02"
+      state_topic: "Seplos/BatteryPack2/cell02"
       web_server:
         sorting_weight: 52
         sorting_group_id: sg_bms2
     cell_voltage_3:
+      filters: *v_to_mv
       name: "BMS2.cell03"
-      state_topic: "BatteryPack2/cell03"
+      state_topic: "Seplos/BatteryPack2/cell03"
       web_server:
         sorting_weight: 53
         sorting_group_id: sg_bms2
     cell_voltage_4:
+      filters: *v_to_mv
       name: "BMS2.cell04"
-      state_topic: "BatteryPack2/cell04"
+      state_topic: "Seplos/BatteryPack2/cell04"
       web_server:
         sorting_weight: 54
         sorting_group_id: sg_bms2
     cell_voltage_5:
+      filters: *v_to_mv
       name: "BMS2.cell05"
-      state_topic: "BatteryPack2/cell05"
+      state_topic: "Seplos/BatteryPack2/cell05"
       web_server:
         sorting_weight: 55
         sorting_group_id: sg_bms2
     cell_voltage_6:
+      filters: *v_to_mv
       name: "BMS2.cell06"
-      state_topic: "BatteryPack2/cell06"
+      state_topic: "Seplos/BatteryPack2/cell06"
       web_server:
         sorting_weight: 56
         sorting_group_id: sg_bms2
     cell_voltage_7:
+      filters: *v_to_mv
       name: "BMS2.cell07"
-      state_topic: "BatteryPack2/cell07"
+      state_topic: "Seplos/BatteryPack2/cell07"
       web_server:
         sorting_weight: 57
         sorting_group_id: sg_bms2
     cell_voltage_8:
+      filters: *v_to_mv
       name: "BMS2.cell08"
-      state_topic: "BatteryPack2/cell08"
+      state_topic: "Seplos/BatteryPack2/cell08"
       web_server:
         sorting_weight: 58
         sorting_group_id: sg_bms2
     cell_voltage_9:
+      filters: *v_to_mv
       name: "BMS2.cell09"
-      state_topic: "BatteryPack2/cell09"
+      state_topic: "Seplos/BatteryPack2/cell09"
       web_server:
         sorting_weight: 59
         sorting_group_id: sg_bms2
     cell_voltage_10:
+      filters: *v_to_mv
       name: "BMS2.cell10"
-      state_topic: "BatteryPack2/cell10"
+      state_topic: "Seplos/BatteryPack2/cell10"
       web_server:
         sorting_weight: 60
         sorting_group_id: sg_bms2
     cell_voltage_11:
+      filters: *v_to_mv
       name: "BMS2.cell11"
-      state_topic: "BatteryPack2/cell11"
+      state_topic: "Seplos/BatteryPack2/cell11"
       web_server:
         sorting_weight: 61
         sorting_group_id: sg_bms2
     cell_voltage_12:
+      filters: *v_to_mv
       name: "BMS2.cell12"
-      state_topic: "BatteryPack2/cell12"
+      state_topic: "Seplos/BatteryPack2/cell12"
       web_server:
         sorting_weight: 62
         sorting_group_id: sg_bms2
     cell_voltage_13:
+      filters: *v_to_mv
       name: "BMS2.cell13"
-      state_topic: "BatteryPack2/cell13"
+      state_topic: "Seplos/BatteryPack2/cell13"
       web_server:
         sorting_weight: 63
         sorting_group_id: sg_bms2
     cell_voltage_14:
+      filters: *v_to_mv
       name: "BMS2.cell14"
-      state_topic: "BatteryPack2/cell14"
+      state_topic: "Seplos/BatteryPack2/cell14"
       web_server:
         sorting_weight: 64
         sorting_group_id: sg_bms2
     cell_voltage_15:
+      filters: *v_to_mv
       name: "BMS2.cell15"
-      state_topic: "BatteryPack2/cell15"
+      state_topic: "Seplos/BatteryPack2/cell15"
       web_server:
         sorting_weight: 65
         sorting_group_id: sg_bms2
     cell_voltage_16:
+      filters: *v_to_mv
       name: "BMS2.cell16"
-      state_topic: "BatteryPack2/cell16"
+      state_topic: "Seplos/BatteryPack2/cell16"
       web_server:
         sorting_weight: 66
         sorting_group_id: sg_bms2
     temperature_1:
       accuracy_decimals: 1
       name: "BMS2.cell_temp1"
-      state_topic: "BatteryPack2/cell_temp1"
+      state_topic: "Seplos/BatteryPack2/cell_temp1"
       web_server:
         sorting_weight: 21
         sorting_group_id: sg_bms2
     temperature_2:
       accuracy_decimals: 1
       name: "BMS2.cell_temp2"
-      state_topic: "BatteryPack2/cell_temp2"
+      state_topic: "Seplos/BatteryPack2/cell_temp2"
       web_server:
         sorting_weight: 22
         sorting_group_id: sg_bms2
     temperature_3:
       accuracy_decimals: 1
       name: "BMS2.cell_temp3"
-      state_topic: "BatteryPack2/cell_temp3"
+      state_topic: "Seplos/BatteryPack2/cell_temp3"
       web_server:
         sorting_weight: 23
         sorting_group_id: sg_bms2
     temperature_4:
       accuracy_decimals: 1
       name: "BMS2.cell_temp4"
-      state_topic: "BatteryPack2/cell_temp4"
+      state_topic: "Seplos/BatteryPack2/cell_temp4"
       web_server:
         sorting_weight: 24
         sorting_group_id: sg_bms2
     current:
       name: "BMS2.charge_discharge"
-      state_topic: "BatteryPack2/charge_discharge"
+      state_topic: "Seplos/BatteryPack2/charge_discharge"
       web_server:
         sorting_weight: 10
         sorting_group_id: sg_bms2
     charging_cycles:
       name: "BMS2.cycles"
-      state_topic: "BatteryPack2/cycles"
+      state_topic: "Seplos/BatteryPack2/cycles"
       web_server:
         sorting_weight: 82
         sorting_group_id: sg_bms2
@@ -537,20 +577,20 @@ sensor:
       filters:
       - multiply: 1000
       name: "BMS2.diff_mv"
-      state_topic: "BatteryPack2/diff_mv"
+      state_topic: "Seplos/BatteryPack2/diff_mv"
       web_server:
         sorting_weight: 83
         sorting_group_id: sg_bms2
     port_voltage:
       name: "BMS2.port_voltage"
-      state_topic: "BatteryPack2/port_voltage"
+      state_topic: "Seplos/BatteryPack2/port_voltage"
       accuracy_decimals: 1
       web_server:
         sorting_weight: 32
         sorting_group_id: sg_overview
     power:
       name: "BMS2.power"
-      state_topic: "BatteryPack2/power"
+      state_topic: "Seplos/BatteryPack2/power"
       accuracy_decimals: 0
       web_server:
         sorting_weight: 42
@@ -558,44 +598,44 @@ sensor:
     temperature_5:
       accuracy_decimals: 1
       name: "BMS2.env_temp"
-      state_topic: "BatteryPack2/env_temp"
+      state_topic: "Seplos/BatteryPack2/env_temp"
       web_server:
         sorting_weight: 25
         sorting_group_id: sg_bms2
     temperature_6:
       accuracy_decimals: 1
       name: "BMS2.power_temp"
-      state_topic: "BatteryPack2/power_temp"
+      state_topic: "Seplos/BatteryPack2/power_temp"
       web_server:
         sorting_weight: 26
         sorting_group_id: sg_bms2
     battery_capacity:
       name: "BMS2.amp_hours2"
-      state_topic: "BatteryPack2/amp_hours2"
+      state_topic: "Seplos/BatteryPack2/amp_hours2"
       web_server:
         sorting_weight: 81
         sorting_group_id: sg_bms2
     residual_capacity:
       name: "BMS2.residual_capacity"
-      state_topic: "BatteryPack2/residual_capacity"
+      state_topic: "Seplos/BatteryPack2/residual_capacity"
       web_server:
         sorting_weight: 83
         sorting_group_id: sg_bms2
     state_of_charge:
       name: "BMS2.soc"
-      state_topic: "BatteryPack2/soc"
+      state_topic: "Seplos/BatteryPack2/soc"
       web_server:
         sorting_weight: 12
         sorting_group_id: sg_overview
     state_of_health:
       name: "BMS2.soh"
-      state_topic: "BatteryPack2/soh"
+      state_topic: "Seplos/BatteryPack2/soh"
       web_server:
         sorting_weight: 85
         sorting_group_id: sg_bms2
     total_voltage:
       name: "BMS2.total_voltage"
-      state_topic: "BatteryPack2/total_voltage"
+      state_topic: "Seplos/BatteryPack2/total_voltage"
       web_server:
         sorting_weight: 10
         sorting_group_id: sg_bms2
@@ -605,143 +645,159 @@ sensor:
     seplos_bms_id: battery_bank2
     rated_capacity:
       name: "BMS3.amp_hours1"
-      state_topic: "BatteryPack3/amp_hours1"
+      state_topic: "Seplos/BatteryPack3/amp_hours1"
       web_server:
         sorting_weight: 80
         sorting_group_id: sg_bms3
     cell_voltage_1:
+      filters: *v_to_mv
       name: "BMS3.cell01"
-      state_topic: "BatteryPack3/cell01"
+      state_topic: "Seplos/BatteryPack3/cell01"
       web_server:
         sorting_weight: 51
         sorting_group_id: sg_bms3
     cell_voltage_2:
+      filters: *v_to_mv
       name: "BMS3.cell02"
-      state_topic: "BatteryPack3/cell02"
+      state_topic: "Seplos/BatteryPack3/cell02"
       web_server:
         sorting_weight: 52
         sorting_group_id: sg_bms3
     cell_voltage_3:
+      filters: *v_to_mv
       name: "BMS3.cell03"
-      state_topic: "BatteryPack3/cell03"
+      state_topic: "Seplos/BatteryPack3/cell03"
       web_server:
         sorting_weight: 53
         sorting_group_id: sg_bms3
     cell_voltage_4:
+      filters: *v_to_mv
       name: "BMS3.cell04"
-      state_topic: "BatteryPack3/cell04"
+      state_topic: "Seplos/BatteryPack3/cell04"
       web_server:
         sorting_weight: 54
         sorting_group_id: sg_bms3
     cell_voltage_5:
+      filters: *v_to_mv
       name: "BMS3.cell05"
-      state_topic: "BatteryPack3/cell05"
+      state_topic: "Seplos/BatteryPack3/cell05"
       web_server:
         sorting_weight: 55
         sorting_group_id: sg_bms3
     cell_voltage_6:
+      filters: *v_to_mv
       name: "BMS3.cell06"
-      state_topic: "BatteryPack3/cell06"
+      state_topic: "Seplos/BatteryPack3/cell06"
       web_server:
         sorting_weight: 56
         sorting_group_id: sg_bms3
     cell_voltage_7:
+      filters: *v_to_mv
       name: "BMS3.cell07"
-      state_topic: "BatteryPack3/cell07"
+      state_topic: "Seplos/BatteryPack3/cell07"
       web_server:
         sorting_weight: 57
         sorting_group_id: sg_bms3
     cell_voltage_8:
+      filters: *v_to_mv
       name: "BMS3.cell08"
-      state_topic: "BatteryPack3/cell08"
+      state_topic: "Seplos/BatteryPack3/cell08"
       web_server:
         sorting_weight: 58
         sorting_group_id: sg_bms3
     cell_voltage_9:
+      filters: *v_to_mv
       name: "BMS3.cell09"
-      state_topic: "BatteryPack3/cell09"
+      state_topic: "Seplos/BatteryPack3/cell09"
       web_server:
         sorting_weight: 59
         sorting_group_id: sg_bms3
     cell_voltage_10:
+      filters: *v_to_mv
       name: "BMS3.cell10"
-      state_topic: "BatteryPack3/cell10"
+      state_topic: "Seplos/BatteryPack3/cell10"
       web_server:
         sorting_weight: 60
         sorting_group_id: sg_bms3
     cell_voltage_11:
+      filters: *v_to_mv
       name: "BMS3.cell11"
-      state_topic: "BatteryPack3/cell11"
+      state_topic: "Seplos/BatteryPack3/cell11"
       web_server:
         sorting_weight: 61
         sorting_group_id: sg_bms3
     cell_voltage_12:
+      filters: *v_to_mv
       name: "BMS3.cell12"
-      state_topic: "BatteryPack3/cell12"
+      state_topic: "Seplos/BatteryPack3/cell12"
       web_server:
         sorting_weight: 62
         sorting_group_id: sg_bms3
     cell_voltage_13:
+      filters: *v_to_mv
       name: "BMS3.cell13"
-      state_topic: "BatteryPack3/cell13"
+      state_topic: "Seplos/BatteryPack3/cell13"
       web_server:
         sorting_weight: 63
         sorting_group_id: sg_bms3
     cell_voltage_14:
+      filters: *v_to_mv
       name: "BMS3.cell14"
-      state_topic: "BatteryPack3/cell14"
+      state_topic: "Seplos/BatteryPack3/cell14"
       web_server:
         sorting_weight: 64
         sorting_group_id: sg_bms3
     cell_voltage_15:
+      filters: *v_to_mv
       name: "BMS3.cell15"
-      state_topic: "BatteryPack3/cell15"
+      state_topic: "Seplos/BatteryPack3/cell15"
       web_server:
         sorting_weight: 65
         sorting_group_id: sg_bms3
     cell_voltage_16:
+      filters: *v_to_mv
       name: "BMS3.cell16"
-      state_topic: "BatteryPack3/cell16"
+      state_topic: "Seplos/BatteryPack3/cell16"
       web_server:
         sorting_weight: 66
         sorting_group_id: sg_bms3
     temperature_1:
       accuracy_decimals: 1
       name: "BMS3.cell_temp1"
-      state_topic: "BatteryPack3/cell_temp1"
+      state_topic: "Seplos/BatteryPack3/cell_temp1"
       web_server:
         sorting_weight: 21
         sorting_group_id: sg_bms3
     temperature_2:
       accuracy_decimals: 1
       name: "BMS3.cell_temp2"
-      state_topic: "BatteryPack3/cell_temp2"
+      state_topic: "Seplos/BatteryPack3/cell_temp2"
       web_server:
         sorting_weight: 22
         sorting_group_id: sg_bms3
     temperature_3:
       accuracy_decimals: 1
       name: "BMS3.cell_temp3"
-      state_topic: "BatteryPack3/cell_temp3"
+      state_topic: "Seplos/BatteryPack3/cell_temp3"
       web_server:
         sorting_weight: 23
         sorting_group_id: sg_bms3
     temperature_4:
       accuracy_decimals: 1
       name: "BMS3.cell_temp4"
-      state_topic: "BatteryPack3/cell_temp4"
+      state_topic: "Seplos/BatteryPack3/cell_temp4"
       web_server:
         sorting_weight: 24
         sorting_group_id: sg_bms3
     current:
       name: "BMS3.charge_discharge"
-      state_topic: "BatteryPack3/charge_discharge"
+      state_topic: "Seplos/BatteryPack3/charge_discharge"
       web_server:
         sorting_weight: 10
         sorting_group_id: sg_bms3
     charging_cycles:
       name: "BMS3.cycles"
-      state_topic: "BatteryPack3/cycles"
+      state_topic: "Seplos/BatteryPack3/cycles"
       web_server:
         sorting_weight: 82
         sorting_group_id: sg_bms3
@@ -749,20 +805,20 @@ sensor:
       filters:
       - multiply: 1000
       name: "BMS3.diff_mv"
-      state_topic: "BatteryPack3/diff_mv"
+      state_topic: "Seplos/BatteryPack3/diff_mv"
       web_server:
         sorting_weight: 83
         sorting_group_id: sg_bms3
     port_voltage:
       name: "BMS3.port_voltage"
-      state_topic: "BatteryPack3/port_voltage"
+      state_topic: "Seplos/BatteryPack3/port_voltage"
       accuracy_decimals: 1
       web_server:
         sorting_weight: 33
         sorting_group_id: sg_overview
     power:
       name: "BMS3.power"
-      state_topic: "BatteryPack3/power"
+      state_topic: "Seplos/BatteryPack3/power"
       accuracy_decimals: 0
       web_server:
         sorting_weight: 43
@@ -770,50 +826,50 @@ sensor:
     temperature_5:
       accuracy_decimals: 1
       name: "BMS3.env_temp"
-      state_topic: "BatteryPack3/env_temp"
+      state_topic: "Seplos/BatteryPack3/env_temp"
       web_server:
         sorting_weight: 25
         sorting_group_id: sg_bms3
     temperature_6:
       accuracy_decimals: 1
       name: "BMS3.power_temp"
-      state_topic: "BatteryPack3/power_temp"
+      state_topic: "Seplos/BatteryPack3/power_temp"
       web_server:
         sorting_weight: 26
         sorting_group_id: sg_bms3
     battery_capacity:
       name: "BMS3.amp_hours2"
-      state_topic: "BatteryPack3/amp_hours2"
+      state_topic: "Seplos/BatteryPack3/amp_hours2"
       web_server:
         sorting_weight: 81
         sorting_group_id: sg_bms3
     residual_capacity:
       name: "BMS3.residual_capacity"
-      state_topic: "BatteryPack3/residual_capacity"
+      state_topic: "Seplos/BatteryPack3/residual_capacity"
       web_server:
         sorting_weight: 83
         sorting_group_id: sg_bms3
     state_of_charge:
       name: "BMS3.soc"
-      state_topic: "BatteryPack3/soc"
+      state_topic: "Seplos/BatteryPack3/soc"
       web_server:
         sorting_weight: 13
         sorting_group_id: sg_overview
     state_of_health:
       name: "BMS3.soh"
-      state_topic: "BatteryPack3/soh"
+      state_topic: "Seplos/BatteryPack3/soh"
       web_server:
         sorting_weight: 85
         sorting_group_id: sg_bms3
     total_voltage:
       name: "BMS3.total_voltage"
-      state_topic: "BatteryPack3/total_voltage"
+      state_topic: "Seplos/BatteryPack3/total_voltage"
       web_server:
         sorting_weight: 10
         sorting_group_id: sg_bms3
 
 
-  - platform: pipsolar
+  - platform: pip8048
     pipsolar_id: inverter1
 #    grid_rating_voltage:
 #      id: grid_rating_voltage
@@ -882,7 +938,7 @@ sensor:
 
     
 # PV1
-    pv_charging_power:
+    pv1_charging_power:
       name: "PV1_W"
       id: INV1_PV1_W
       unit_of_measurement: "W"
@@ -893,7 +949,7 @@ sensor:
         sorting_weight: 12
         sorting_group_id: sg_inv1
   
-    pv_input_voltage:
+    pv1_input_voltage:
       name: "PV1_V"
       id: INV1_PV1_V
       unit_of_measurement: "V"
@@ -902,6 +958,29 @@ sensor:
       state_topic: "INV_G1/pv1v"
       web_server:
         sorting_weight: 22
+        sorting_group_id: sg_inv1
+
+# PV2
+    pv2_charging_power:
+      name: "PV2_W"
+      id: INV1_PV2_W
+      unit_of_measurement: "W"
+      state_class: "measurement"
+      accuracy_decimals: 0
+      state_topic: "INV_G1/pv2w"
+      web_server:
+        sorting_weight: 13
+        sorting_group_id: sg_inv1
+
+    pv2_input_voltage:
+      name: "PV2_V"
+      id: INV1_PV2_V
+      unit_of_measurement: "V"
+      state_class: "measurement"
+      accuracy_decimals: 1
+      state_topic: "INV_G1/pv2v"
+      web_server:
+        sorting_weight: 23
         sorting_group_id: sg_inv1
 
 #  - pv_input_current_for_battery:  state_topic: "INV_G1/pv1a" -> PIP keine strom.
@@ -966,7 +1045,7 @@ sensor:
       sorting_group_id: sg_intern
 
 text_sensor:
-  - platform: pipsolar
+  - platform: pip8048
     pipsolar_id: inverter1
     device_mode:
       name: "${name} device_mode"
@@ -999,7 +1078,7 @@ light:
       sorting_group_id: sg_intern
     
 binary_sensor:
-  - platform: pipsolar
+  - platform:  pip8048
     pipsolar_id: inverter1
 #    add_sbu_priority_version:
 #      name: "${name} add_sbu_priority_version"

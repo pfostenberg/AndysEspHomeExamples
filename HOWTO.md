@@ -34,6 +34,29 @@ Das Script macht folgende Schritte automatisch:
 
 Nach erfolgreichem Script-Ablauf: Gehe direkt zu **Abschnitt 5 (Secrets einrichten)**.
 
+### PowMr Build-Script (PowerShell)
+
+Das Script `scripts/build-powmr1.ps1` verwendet `esphome/powmr1.yaml` und findet
+ESPHome in `scripts/.venv`, alternativ in `.venv` oder im PATH. Die Pfade werden
+relativ zum Script aufgeloest, unabhaengig vom aktuellen Terminalordner.
+
+Aus dem Repository-Verzeichnis:
+
+```powershell
+.\scripts\build-powmr1.ps1 validate
+.\scripts\build-powmr1.ps1 compile
+.\scripts\build-powmr1.ps1 upload -Device COM3
+.\scripts\build-powmr1.ps1 ota -Device 192.168.77.13
+.\scripts\build-powmr1.ps1 logs -Device 192.168.77.13
+.\scripts\build-powmr1.ps1 run -Device COM3
+```
+
+Ohne Befehl wird nur kompiliert. `upload` und `ota` kompilieren vor dem Flashen;
+`ota` verwendet ohne `-Device` den Hostnamen `powmr1.local`. `help` zeigt die
+Befehle an. Fehler von ESPHome werden als Exit-Code weitergegeben.
+Die relativen `!include`- und `includes`-Pfade in der YAML muessen zu deren
+Speicherort passen; benoetigte Dateien muessen dort vorhanden sein.
+
 ---
 
 ## Manuelle Installation (Alternative)
