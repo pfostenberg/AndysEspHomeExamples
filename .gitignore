@@ -71,3 +71,10 @@ Testing/
 # ESPHome local secrets should never be committed
 #esphome/secrets.yaml
 
+/esphome
+hagen/esphome/secrets.yaml
+esphome/secrets.yaml
+esphome/secrets.yaml
+esphome/secrets.yaml
+esphome/secrets.yaml
+esphome/secrets.yaml
