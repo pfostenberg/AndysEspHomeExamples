@@ -15,7 +15,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$ConfigFile = "esphome\pip5048_seplos.yaml"
+$ConfigFile = "esphome\pipseplos02.yaml"
 # venv liegt im scripts/-Ordner eine Ebene höher
 $ESPHome    = "..\scripts\.venv\Scripts\esphome.exe"
 
