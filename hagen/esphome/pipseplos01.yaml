@@ -191,6 +191,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_1:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell01"
       state_topic: "Seplos/BatteryPack1/cell01"
       web_server:
@@ -198,6 +200,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_2:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell02"
       state_topic: "Seplos/BatteryPack1/cell02"
       web_server:
@@ -205,6 +209,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_3:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell03"
       state_topic: "Seplos/BatteryPack1/cell03"
       web_server:
@@ -212,6 +218,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_4:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell04"
       state_topic: "Seplos/BatteryPack1/cell04"
       web_server:
@@ -219,6 +227,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_5:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell05"
       state_topic: "Seplos/BatteryPack1/cell05"
       web_server:
@@ -226,6 +236,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_6:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell06"
       state_topic: "Seplos/BatteryPack1/cell06"
       web_server:
@@ -233,6 +245,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_7:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell07"
       state_topic: "Seplos/BatteryPack1/cell07"
       web_server:
@@ -240,6 +254,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_8:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell08"
       state_topic: "Seplos/BatteryPack1/cell08"
       web_server:
@@ -247,6 +263,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_9:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell09"
       state_topic: "Seplos/BatteryPack1/cell09"
       web_server:
@@ -254,6 +272,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_10:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell10"
       state_topic: "Seplos/BatteryPack1/cell10"
       web_server:
@@ -261,6 +281,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_11:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell11"
       state_topic: "Seplos/BatteryPack1/cell11"
       web_server:
@@ -268,6 +290,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_12:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell12"
       state_topic: "Seplos/BatteryPack1/cell12"
       web_server:
@@ -275,6 +299,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_13:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell13"
       state_topic: "Seplos/BatteryPack1/cell13"
       web_server:
@@ -282,6 +308,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_14:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell14"
       state_topic: "Seplos/BatteryPack1/cell14"
       web_server:
@@ -289,6 +317,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_15:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell15"
       state_topic: "Seplos/BatteryPack1/cell15"    
       web_server:
@@ -296,6 +326,8 @@ sensor:
         sorting_group_id: sg_bms1
     cell_voltage_16:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS1.cell16"
       state_topic: "Seplos/BatteryPack1/cell16"    
       web_server:
@@ -423,6 +455,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_1:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell01"
       state_topic: "Seplos/BatteryPack2/cell01"
       web_server:
@@ -430,6 +464,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_2:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell02"
       state_topic: "Seplos/BatteryPack2/cell02"
       web_server:
@@ -437,6 +473,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_3:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell03"
       state_topic: "Seplos/BatteryPack2/cell03"
       web_server:
@@ -444,6 +482,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_4:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell04"
       state_topic: "Seplos/BatteryPack2/cell04"
       web_server:
@@ -451,6 +491,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_5:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell05"
       state_topic: "Seplos/BatteryPack2/cell05"
       web_server:
@@ -458,6 +500,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_6:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell06"
       state_topic: "Seplos/BatteryPack2/cell06"
       web_server:
@@ -465,6 +509,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_7:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell07"
       state_topic: "Seplos/BatteryPack2/cell07"
       web_server:
@@ -472,6 +518,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_8:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell08"
       state_topic: "Seplos/BatteryPack2/cell08"
       web_server:
@@ -479,6 +527,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_9:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell09"
       state_topic: "Seplos/BatteryPack2/cell09"
       web_server:
@@ -486,6 +536,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_10:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell10"
       state_topic: "Seplos/BatteryPack2/cell10"
       web_server:
@@ -493,6 +545,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_11:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell11"
       state_topic: "Seplos/BatteryPack2/cell11"
       web_server:
@@ -500,6 +554,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_12:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell12"
       state_topic: "Seplos/BatteryPack2/cell12"
       web_server:
@@ -507,6 +563,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_13:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell13"
       state_topic: "Seplos/BatteryPack2/cell13"
       web_server:
@@ -514,6 +572,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_14:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell14"
       state_topic: "Seplos/BatteryPack2/cell14"
       web_server:
@@ -521,6 +581,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_15:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell15"
       state_topic: "Seplos/BatteryPack2/cell15"
       web_server:
@@ -528,6 +590,8 @@ sensor:
         sorting_group_id: sg_bms2
     cell_voltage_16:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS2.cell16"
       state_topic: "Seplos/BatteryPack2/cell16"
       web_server:
@@ -651,6 +715,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_1:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell01"
       state_topic: "Seplos/BatteryPack3/cell01"
       web_server:
@@ -658,6 +724,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_2:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell02"
       state_topic: "Seplos/BatteryPack3/cell02"
       web_server:
@@ -665,6 +733,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_3:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell03"
       state_topic: "Seplos/BatteryPack3/cell03"
       web_server:
@@ -672,6 +742,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_4:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell04"
       state_topic: "Seplos/BatteryPack3/cell04"
       web_server:
@@ -679,6 +751,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_5:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell05"
       state_topic: "Seplos/BatteryPack3/cell05"
       web_server:
@@ -686,6 +760,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_6:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell06"
       state_topic: "Seplos/BatteryPack3/cell06"
       web_server:
@@ -693,6 +769,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_7:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell07"
       state_topic: "Seplos/BatteryPack3/cell07"
       web_server:
@@ -700,6 +778,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_8:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell08"
       state_topic: "Seplos/BatteryPack3/cell08"
       web_server:
@@ -707,6 +787,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_9:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell09"
       state_topic: "Seplos/BatteryPack3/cell09"
       web_server:
@@ -714,6 +796,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_10:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell10"
       state_topic: "Seplos/BatteryPack3/cell10"
       web_server:
@@ -721,6 +805,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_11:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell11"
       state_topic: "Seplos/BatteryPack3/cell11"
       web_server:
@@ -728,6 +814,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_12:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell12"
       state_topic: "Seplos/BatteryPack3/cell12"
       web_server:
@@ -735,6 +823,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_13:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell13"
       state_topic: "Seplos/BatteryPack3/cell13"
       web_server:
@@ -742,6 +832,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_14:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell14"
       state_topic: "Seplos/BatteryPack3/cell14"
       web_server:
@@ -749,6 +841,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_15:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell15"
       state_topic: "Seplos/BatteryPack3/cell15"
       web_server:
@@ -756,6 +850,8 @@ sensor:
         sorting_group_id: sg_bms3
     cell_voltage_16:
       filters: *v_to_mv
+      unit_of_measurement: "mV"
+      accuracy_decimals: 0
       name: "BMS3.cell16"
       state_topic: "Seplos/BatteryPack3/cell16"
       web_server:
